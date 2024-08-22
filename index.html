@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asyu's Minerva Chatbot Edit</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body, html {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: 260px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        #chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: #4a5568;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .content {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            max-width: 80%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user .content {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        #input-container {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        #user-input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            resize: none;
+            font-size: 16px;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        #user-input:focus {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #send-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #send-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #send-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator .content {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: inline-block;
+            margin-right: 5px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .abstract-shape {
+            position: absolute;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .shape1 {
+            top: 10%;
+            left: 5%;
+            width: 100px;
+            height: 100px;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            background-color: #ffd700;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .shape2 {
+            bottom: 15%;
+            right: 10%;
+            width: 150px;
+            height: 150px;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            background-color: #ff6b6b;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+
+        #settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        #settings-icon:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #settings-pane {
+            position: absolute;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        #settings-pane.open {
+            right: 0;
+        }
+
+        #settings-pane h2 {
+            margin-top: 0;
+        }
+
+        #api-key-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+
+        #save-api-key {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #save-api-key:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="sidebar">
+            <h2>Minerva Chatbot</h2>
+        </div>
+        <div id="chat-container">
+            <div class="abstract-shape shape1"></div>
+            <div class="abstract-shape shape2"></div>
+            <div id="chat-messages"></div>
+            <div id="input-container">
+                <textarea id="user-input" rows="3" placeholder="Type your message here..."></textarea>
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+    <div id="settings-icon">⚙️</div>
+    <div id="settings-pane">
+        <h2>Settings</h2>
+        <label for="api-key-input">OpenAI API Key:</label>
+        <input type="password" id="api-key-input" placeholder="Enter your API key">
+        <button id="save-api-key">Save API Key</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const settingsIcon = document.getElementById('settings-icon');
+        const settingsPane = document.getElementById('settings-pane');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveApiKeyButton = document.getElementById('save-api-key');
+
+        let apiKey = localStorage.getItem('openai_api_key') || '';
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        settingsIcon.addEventListener('click', toggleSettingsPane);
+        saveApiKeyButton.addEventListener('click', saveApiKey);
+
+        function toggleSettingsPane() {
+            settingsPane.classList.toggle('open');
+        }
+
+        function saveApiKey() {
+            apiKey = apiKeyInput.value.trim();
+            localStorage.setItem('openai_api_key', apiKey);
+            alert('API Key saved successfully!');
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage('user', message);
+                userInput.value = '';
+                showTypingIndicator();
+                try {
+                    const response = await getAIResponse(message);
+                    removeTypingIndicator();
+                    addMessage('ai', response);
+                } catch (error) {
+                    console.error('Error:', error);
+                    removeTypingIndicator();
+                    addMessage('ai', 'Sorry, I encountered an error. Please try again.');
+                }
+            }
+        }
+
+        function addMessage(sender, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const initial = sender === 'user' ? 'U' : 'A';
+            messageDiv.innerHTML = `
+                <div class="avatar">${initial}</div>
+                <div class="content">${content}</div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="avatar">A</div>
+                <div class="content">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.querySelector('.typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        async function getAIResponse(message) {
+            if (!apiKey) {
+                throw new Error('API Key not set. Please set your OpenAI API Key in the settings.');
+            }
+
+            const API_URL = 'https://api.openai.com/v1/chat/completions';
+
+            try {
+                const response = await axios.post(API_URL, {
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {role: "system", content: "You are a helpful assistant who works for Silvea Technologies. You provide only factual information and do not make up any lies or misinformation."},
+                        {role: "user", content: message}
+                    ],
+                    max_tokens: 150
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                return response.data.choices[0].message.content;
+            } catch (error) {
+                console.error('Error calling OpenAI API:', error);
+                throw error;
+            }
+        }
+
+        // Load saved API key on page load
+        window.addEventListener('load', () => {
+            const savedApiKey = localStorage.getItem('openai_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+                apiKey = savedApiKey;
+            }
+        });
+    </script>
+</body>
+</html>
